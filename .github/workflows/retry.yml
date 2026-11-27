@@ -23,9 +23,10 @@ jobs:
         id: check
         env:
           OCI_KEY: ${{ secrets.OCI_KEY }}
+          OCI_SETTINGS: ${{ secrets.OCI_SETTINGS }}
         run: |
-          if [ -z "$OCI_KEY" ]; then
-            echo "Secret OCI_KEY ainda não foi cadastrado – nada a fazer." >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$OCI_KEY" ] || [ -z "$OCI_SETTINGS" ]; then
+            echo "Secrets OCI_KEY / OCI_SETTINGS ainda não cadastrados – nada a fazer." >> "$GITHUB_STEP_SUMMARY"
             echo "ok=false" >> "$GITHUB_OUTPUT"
           else
             echo "ok=true" >> "$GITHUB_OUTPUT"
@@ -47,12 +48,8 @@ jobs:
         id: retry
         if: steps.check.outputs.ok == 'true'
         env:
-          OCI_USER: ${{ secrets.OCI_USER }}
-          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_SETTINGS: ${{ secrets.OCI_SETTINGS }}
           OCI_KEY: ${{ secrets.OCI_KEY }}
-          VM_SETTINGS: ${{ secrets.VM_SETTINGS }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           MAX_MINUTES: "28"
         run: python retry.py

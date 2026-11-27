@@ -12,8 +12,7 @@ rodando no GitHub Actions — funciona com o computador desligado.
 
 | Secret | Conteúdo |
 |---|---|
-| `OCI_USER`, `OCI_FINGERPRINT`, `OCI_TENANCY`, `OCI_REGION` | dados da chave de API (já cadastrados) |
-| `VM_SETTINGS` | JSON com compartment, AD, subnet, imagem e chave SSH pública (já cadastrado) |
+| `OCI_SETTINGS` | JSON com dados da chave de API, compartment, AD, subnet, imagem e chave SSH pública |
 | `OCI_KEY` | **conteúdo inteiro** do arquivo `.pem` da chave de API (você cadastra) |
 | `NTFY_TOPIC` | opcional – tópico do app ntfy para aviso no celular |
 

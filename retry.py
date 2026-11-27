@@ -3,9 +3,10 @@
 Tenta criar uma VM Ampere A1 (Always Free) na Oracle Cloud até conseguir.
 Alterna entre 1 OCPU/6 GB, 2 OCPU/12 GB e 4 OCPU/24 GB.
 
-Todos os dados da conta vêm de variáveis de ambiente (GitHub Secrets):
-  OCI_USER, OCI_FINGERPRINT, OCI_TENANCY, OCI_REGION, OCI_KEY  -> autenticação
-  VM_SETTINGS (JSON) -> compartment_id, availability_domain, subnet_id, image_id, ssh_public_key
+Todos os dados da conta vêm de GitHub Secrets:
+  OCI_SETTINGS (JSON) -> user, fingerprint, tenancy, region, compartment_id,
+                         availability_domain, subnet_id, image_id, ssh_public_key
+  OCI_KEY             -> conteúdo do arquivo .pem da chave de API
 Opcionais:
   NTFY_TOPIC   -> aviso no celular pelo app ntfy
   MAX_MINUTES  -> quanto tempo esta execução fica tentando (padrão 25)
@@ -94,13 +95,13 @@ def finalizar(compute, network, comp, inst, cfg_txt):
 
 
 def main():
-    s = json.loads(os.environ["VM_SETTINGS"])
+    s = json.loads(os.environ["OCI_SETTINGS"])
     comp = s["compartment_id"]
     config = {
-        "user": os.environ["OCI_USER"],
-        "fingerprint": os.environ["OCI_FINGERPRINT"],
-        "tenancy": os.environ["OCI_TENANCY"],
-        "region": os.environ["OCI_REGION"],
+        "user": s["user"],
+        "fingerprint": s["fingerprint"],
+        "tenancy": s["tenancy"],
+        "region": s["region"],
         "key_content": os.environ["OCI_KEY"],
     }
     oci.config.validate_config(config)
