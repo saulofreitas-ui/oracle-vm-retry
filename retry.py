@@ -79,19 +79,21 @@ def ip_publico(compute, network, comp, inst_id):
 
 
 def finalizar(compute, network, comp, inst, cfg_txt):
-    log(f"VM encontrada/criada ({cfg_txt}) – aguardando IP público...")
+    # O repositório é público: o IP NÃO vai para log/issue, só para o aviso privado (ntfy).
+    log(f"VM encontrada/criada ({cfg_txt}) – aguardando ficar RUNNING...")
     ip = ip_publico(compute, network, comp, inst.id) or "(sem IP ainda – veja no console)"
-    texto = (
+    publico = (
         f"VM criada! {cfg_txt}\n"
         f"Nome: {inst.display_name}\n"
-        f"IP: {ip}\n"
-        f"Acesso: ssh -i oracle_vm_key ubuntu@{ip}"
+        f"IP: veja no console da Oracle (Compute > Instances)\n"
+        f"Acesso: ssh -i oracle_vm_key ubuntu@IP_DA_VM"
     )
-    log(texto)
+    log(publico)
     gh_output("created", "true")
-    gh_output("message", texto)
-    gh_summary("## ✅ " + texto.replace("\n", "  \n"))
-    notificar("VM Oracle criada!", texto)
+    gh_output("message", publico)
+    gh_summary("## ✅ " + publico.replace("\n", "  \n"))
+    notificar("VM Oracle criada!", publico.replace("IP: veja no console da Oracle (Compute > Instances)", f"IP: {ip}")
+              .replace("IP_DA_VM", ip))
 
 
 def main():

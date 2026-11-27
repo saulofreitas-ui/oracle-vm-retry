@@ -5,7 +5,7 @@ rodando no GitHub Actions — funciona com o computador desligado.
 
 - Alterna entre **1 OCPU/6 GB**, **2 OCPU/12 GB** e **4 OCPU/24 GB**, uma tentativa por minuto.
 - Se já existir uma VM A1 na conta, não cria outra.
-- Quando conseguir: abre uma *issue* "✅ VM Oracle criada" com o IP (chega no seu e-mail),
+- Quando conseguir: abre uma *issue* "✅ VM Oracle criada" (chega no seu e-mail; o IP não aparece no GitHub por ser público — veja no console da Oracle ou no aviso do ntfy),
   manda aviso no app **ntfy** (se o secret `NTFY_TOPIC` existir) e **desliga o próprio workflow**.
 
 ## Secrets (Settings → Secrets and variables → Actions)
