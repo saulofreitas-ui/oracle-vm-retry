@@ -1,0 +1,67 @@
+name: Tentar criar VM Oracle
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # a cada 10 min (o GitHub pode atrasar alguns minutos)
+  workflow_dispatch: {}        # botão "Run workflow" para rodar na hora
+
+concurrency:
+  group: oracle-retry
+  cancel-in-progress: false    # nunca roda duas tentativas ao mesmo tempo
+
+permissions:
+  actions: write   # para desligar o próprio workflow quando criar a VM
+  issues: write    # para abrir uma issue avisando (chega no seu e-mail)
+  contents: read
+
+jobs:
+  tentar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Verificar se os secrets existem
+        id: check
+        env:
+          OCI_KEY: ${{ secrets.OCI_KEY }}
+        run: |
+          if [ -z "$OCI_KEY" ]; then
+            echo "Secret OCI_KEY ainda não foi cadastrado – nada a fazer." >> "$GITHUB_STEP_SUMMARY"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ok == 'true'
+
+      - uses: actions/setup-python@v5
+        if: steps.check.outputs.ok == 'true'
+        with:
+          python-version: "3.12"
+
+      - name: Instalar SDK da Oracle
+        if: steps.check.outputs.ok == 'true'
+        run: pip install --quiet oci
+
+      - name: Tentar criar a VM
+        id: retry
+        if: steps.check.outputs.ok == 'true'
+        env:
+          OCI_USER: ${{ secrets.OCI_USER }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_KEY: ${{ secrets.OCI_KEY }}
+          VM_SETTINGS: ${{ secrets.VM_SETTINGS }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MAX_MINUTES: "28"
+        run: python retry.py
+
+      - name: Avisar e desligar o workflow
+        if: steps.retry.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MSG: ${{ steps.retry.outputs.message }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "✅ VM Oracle criada" --body "$MSG"
+          gh workflow disable "Tentar criar VM Oracle" --repo "$GITHUB_REPOSITORY"
